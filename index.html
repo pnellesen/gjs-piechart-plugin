@@ -4,8 +4,11 @@
     <meta charset="utf-8">
     <title>GrapesJS Plugin Boilerplate</title>
     <link href="https://unpkg.com/grapesjs/dist/css/grapes.min.css" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.min.js"></script>
     <script src="https://unpkg.com/grapesjs"></script>
-    <script src="dist/grapesjs-plugin-boilerplate.min.js"></script>
+    <script src="dist/gjs-ignite-piechart.min.js"></script>
+    <script src="grapesjs-component-countdown.min.js"></script>
     <style>
       body,
       html {
@@ -16,29 +19,134 @@
   </head>
   <body>
 
-    <div id="gjs" style="height:0px; overflow:hidden">
-      <div style="margin:100px 100px 25px; padding:25px; font:caption">
-        This is a demo content from index.html. For the development, you shouldn't edit this file, instead you can
-        copy and rename it to _index.html, on next server start the new file will be served, and it will be ignored by git.
-      </div>
+    <div class="panel__top">
+      <div class="panel__basic-actions"></div>
     </div>
-
+    <div id="gjs">
+      <h1>Hello World Component!</h1>
+    </div>
+    <div id="blocks"></div>
+    <div id="myDiv">
+        <div>
+            <h2>Some new content here</h2>
+            <div>A block of text to copy to canvas</div>
+        </div>
+    </div>
+  
+    <!-- placeholder chart here, for validating that it works -->
+    <!-- try to make this into a grapesJS component -->
+    <!--HTML-->
+    <div class="chart" style="width:500px;height:800px">
+        <canvas id="myPieChart" height="250" width="400"></canvas>
+    </div>
+      <!--Script-->
+      <script>
+        var ctx = document.getElementById("myPieChart");
+        var myPieChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: ["M", "T", "W", "T", "F", "S", "S"],
+            datasets: [{
+                backgroundColor: [
+                "#f56954",
+                "#00a65a",
+                "#f39c12",
+                "#00c0ef",
+                "#3c8dbc",
+                "#ca195a",
+                "#d2d6de"
+                ],
+                data: [12, 19, 3, 17, 28, 24, 7]
+            }]
+            }
+        });
+        </script>
+        <!-- // End chart -->
 
     <script type="text/javascript">
-      var editor = grapesjs.init({
-        height: '100%',
+      const editor = grapesjs.init({
         showOffsets: 1,
         noticeOnUnload: 0,
-        storageManager: { autoload: 0 },
         container: '#gjs',
         fromElement: true,
-
-        plugins: ['YOUR-PLUGIN-NAME'],
+        // Size of the editor
+        height: '300px',
+        width: 'auto',
+        // Disable the storage manager for the moment
+        storageManager: { type: null },
+        // Avoid any default panel
+        panels: { defaults: [] },
+        
+        //Plugins
+        plugins: ['gjs-ignite-piechart','gjs-component-countdown'],
         pluginsOpts: {
-          'YOUR-PLUGIN-NAME': {}
-        }
+          'gjs-ignite-piechart': {},
+          'gjs-component-countdown': {}
+        },
+        canvas: {
+	        	/**
+	        	* custom styling/scripts to add to match styling used by Ignite.
+	        	* we may want to look into adding these into the plugin itself
+	        	* but this works for initial investigations
+	        	*/
+	        	styles:[
+	        	],
+	        	scripts:[
+	        		'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.min.js'// v2.6+ required to drag/drop charts into the grapesJS canvas
+	        	]
+	        },
+        //Blocks
+        blockManager: {
+          appendTo: '#blocks',
+            blocks: [
+            {
+                id: 'section', // id is mandatory
+                label: '<b>Section</b>', // You can use HTML/SVG inside labels
+                attributes: { class:'gjs-block-section' },
+                content: `<section>
+                <h1>This is a simple title</h1>
+                <div>This is just a Lorem text: Lorem ipsum dolor sit amet</div>
+                </section>`,
+            }, {
+                id: 'text',
+                label: 'Text',
+                content: '<div data-gjs-type="text">Insert your text here</div>',
+            }, {
+                id: 'image',
+                label: 'Image',
+                // Select the component once it's dropped
+                select: true,
+                // You can pass components as a JSON instead of a simple HTML string,
+                // in this case we also use a defined component type `image`
+                content: { type: 'image' },
+                // This triggers `active` event on dropped components and the `image`
+                // reacts by opening the AssetManager
+                activate: true,
+                category: 'Others'
+            }, /*{
+                id: 'piechart',
+                label: 'Pie Chart',
+                content: `<div class="chart" style="width:500px;height:800px">
+                    <canvas id="myPieChart" height="250" width="400"></canvas>
+                </div>`
+            }*/
+          ]
+        },
       });
-      window.editor = editor;
+      var bottomBlocks = editor.BlockManager;
+      bottomBlocks.add('image', {
+        label: 'Image',
+                // Select the component once it's dropped
+                select: true,
+                // You can pass components as a JSON instead of a simple HTML string,
+                // in this case we also use a defined component type `image`
+                content: { type: 'image' },
+                // This triggers `active` event on dropped components and the `image`
+                // reacts by opening the AssetManager
+                activate: true,
+                category: 'Standard'
+      })
+      //window.editor = editor;
     </script>
   </body>
 </html>

@@ -34,32 +34,45 @@ export default (editor, opt = {}) => {
         // stuff for trait/settings manager
         ...colorDataObj,
         ...sectionDataObj,
+
+        blnInitChart: true,
+
         traits: [
           ...traitColorData,// deconstruct color data
-          ...traitValData //deconstruct value data
+          ...traitValData, //deconstruct value data
         ],
         // end trait/settings setup
 
-        strColorData: JSON.stringify(Object.keys(colorDataObj).map(item => colorDataObj[item])),// to pass data to the javascript function, HAS to be a string to be interpolated correctly per GrapesJS docs
-        strValData: JSON.stringify(Object.keys(sectionDataObj).map(item => sectionDataObj[item])),
-        strData: JSON.stringify(chartData),
+        // set up variables for javascript function, per GrapesJS docs
+        strColorData: Object.keys(colorDataObj).map(item => colorDataObj[item]),
+        strValData: Object.keys(sectionDataObj).map(item => sectionDataObj[item]),
+        strLabelData: Object.keys(chartData).map(item => chartData[item].label),
         script: function () {
+          var chartEl = this;
           var ctx = document.getElementById("newPieChart").getContext("2d");
-          var chartData = JSON.parse('{[ strData ]}');
-          var strValData = JSON.parse('{[ strValData ]}');
-          var strColorData = JSON.parse('{[ strColorData ]}');
-          var newPieChart = new Chart(ctx, {
-          type: 'pie',
-          data: {
-              labels: chartData.map(item => item.label),
-              datasets: [{
-                  backgroundColor: strColorData,
-                  data: strValData
-              }]
-              }
-          });
-          function updatePieChart() {
-            console.log("update pie chart")
+          var strColorData = '{[ strColorData ]}'.split(",");
+          var strValData = '{[ strValData ]}'.split(",")
+          var strLabelData = '{[ strLabelData ]}'.split(",")
+          var blnInitChart = '{[ blnInitChart ]}'
+          if (blnInitChart) {
+            console.log("Initialize Chart")
+            var newPieChart = new Chart(ctx, {
+              type: 'pie',
+              data: {
+                  labels: strLabelData,
+                  datasets: [{
+                      backgroundColor: strColorData,
+                      data: strValData
+                  }]
+                  }
+              });
+              chartEl.newPieChart = newPieChart;
+          } else {
+            chartEl.newPieChart.data.datasets = [{
+              backgroundColor: strColorData,
+              data: strValData
+            }];
+            chartEl.newPieChart.update({duration: 0});
           }
         },
       },
@@ -79,14 +92,16 @@ export default (editor, opt = {}) => {
         this.listenTo(this.model, valChangeStr, function() {return this.updateChart('data')});
       },
       updateChart(changeType) {
+        if (this.model.attributes.blnInitChart) this.model.attributes.blnInitChart = false;
         if (changeType === 'color') {
           var newColorData = traitColorData.map(item => this.model.attributes[item.name])
-          this.model.attributes['strColorData'] = JSON.stringify(newColorData);
+          this.model.attributes['strColorData'] = newColorData;
         } else {
           var newValData = traitValData.map(item => this.model.attributes[item.name])
-          this.model.attributes['strValData'] = JSON.stringify(newValData);
+          this.model.attributes['strValData'] = newValData;
         }
         this.updateScript();
+        
       }
     }),
   });

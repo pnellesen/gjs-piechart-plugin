@@ -20,7 +20,6 @@ export default (editor, opt = {}) => {
     return ({name:`${'data' + item.name}`, label:item.label, changeProp: 1, type: 'number'})
   })
   // End trait/settings data setup
-
   dc.addType(piechartType, {
     model: defaultModel.extend({
       defaults: {
@@ -40,27 +39,22 @@ export default (editor, opt = {}) => {
           ...traitValData //deconstruct value data
         ],
         // end trait/settings setup
-        strColorData: JSON.stringify(traitColorData),
-        strData: JSON.stringify(chartData),// to pass to the javascript function, HAS to be a string to be interpolated correctly per GrapesJS docs
+
+        strColorData: JSON.stringify(Object.keys(colorDataObj).map(item => colorDataObj[item])),// to pass data to the javascript function, HAS to be a string to be interpolated correctly per GrapesJS docs
+        strValData: JSON.stringify(Object.keys(sectionDataObj).map(item => sectionDataObj[item])),
+        strData: JSON.stringify(chartData),
         script: function () {
           var ctx = document.getElementById("newPieChart").getContext("2d");
           var chartData = JSON.parse('{[ strData ]}');
+          var strValData = JSON.parse('{[ strValData ]}');
           var strColorData = JSON.parse('{[ strColorData ]}');
-
-          // THIS ALSO WORKS IF WE CREATE STRINGS OF EACH INDIVIDUAL ELEMENT (i.e. string1='{[ colornameM ]}').
-          // HAVE NOT BEEN ABLE TO DYNAMICALLY GENERATE FROM strColorData array.
-          var myString = "{[ colornameM ]}"
-          var strColorNames = [myString,'{[ colornameT ]}','{[ colornameW ]}','{[ colornameTh ]}','{[ colornameF ]}','{[ colornameSa ]}','{[ colornameSu ]}']
-
-          console.log("traitColorData? ", strColorData);
           var newPieChart = new Chart(ctx, {
           type: 'pie',
           data: {
               labels: chartData.map(item => item.label),
               datasets: [{
-                  //backgroundColor: chartData.map(item => item.color),
-                  backgroundColor: strColorNames,
-                  data: chartData.map(item => item.data)
+                  backgroundColor: strColorData,
+                  data: strValData
               }]
               }
           });
@@ -80,10 +74,19 @@ export default (editor, opt = {}) => {
     view: defaultType.view.extend({
       init() {
         var colorChangeStr = Object.keys(colorDataObj).map(item => 'change:' + item).join(" ");
-        //this.listenTo(this.model, 'change:startfrom change:endText', this.updateScript);
-        this.listenTo(this.model, colorChangeStr, this.updateScript);
-        console.log("inside view. model? ", this.model);
-        console.log("inside view - colorDataObj string? ", colorChangeStr);
+        var valChangeStr = Object.keys(sectionDataObj).map(item => 'change:' + item).join(" ");
+        this.listenTo(this.model, colorChangeStr, function() {return this.updateChart('color')});
+        this.listenTo(this.model, valChangeStr, function() {return this.updateChart('data')});
+      },
+      updateChart(changeType) {
+        if (changeType === 'color') {
+          var newColorData = traitColorData.map(item => this.model.attributes[item.name])
+          this.model.attributes['strColorData'] = JSON.stringify(newColorData);
+        } else {
+          var newValData = traitValData.map(item => this.model.attributes[item.name])
+          this.model.attributes['strValData'] = JSON.stringify(newValData);
+        }
+        this.updateScript();
       }
     }),
   });

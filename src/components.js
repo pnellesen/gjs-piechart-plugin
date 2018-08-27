@@ -4,7 +4,7 @@ export default (editor, opt = {}) => {
   const defaultType = dc.getType('default');
   const defaultModel = defaultType.model;
   const piechartType = 'piechart';
-  const chartData = c.optChartData || [{"name":"defaultName","label":"No data provided","value":0}];
+  const chartData = c.optChartData || [{"name":"defaultName","label":"No data","data":1,"color":"#ccc"}];
 
   //Setup the attributes and data for traits
   const colorDataObj = {}

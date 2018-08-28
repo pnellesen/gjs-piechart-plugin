@@ -3,16 +3,13 @@ export default (editor, config = {}) => {
   // ...
 
   console.log("blocks.js - BlockManager - getAll before: ", bm.getAll());
- 
+
 
  bm.add('piechart', {
   label: 'Pie Chart',
-  content: `<div class="chart" style="width:500px;height:800px;border:1px solid #000">
-      <h2>Pie chart here</h2>
-      <canvas data-gjs-type="piechart"  id="newPieChart" height="250" width="400"></canvas>
-  </div>`,
+  content: '<div class="chart-container" style="position: relative;height:500px;width:500px;resize:both;overflow:auto"><canvas data-gjs-type="piechart"></canvas></div>',
   category: 'Extra'
- }) 
+ })
 
- 
+
 }

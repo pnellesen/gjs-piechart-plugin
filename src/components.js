@@ -29,7 +29,7 @@ export default (editor, opt = {}) => {
         droppable: true,
         copyable: true,
         removable: true,
-        resizable: true,
+        //resizable: true,
 
         // stuff for trait/settings manager
         ...colorDataObj,
@@ -47,14 +47,15 @@ export default (editor, opt = {}) => {
         strLabelData: Object.keys(chartData).map(item => chartData[item].label),
         script: function () {
           var chartEl = this;
-          var ctx = document.getElementById("newPieChart").getContext("2d");
+          var ctx = chartEl.getContext("2d");
           var strColorData = '{[ strColorData ]}'.split(",");
           var strValData = '{[ strValData ]}'.split(",")
           var strLabelData = '{[ strLabelData ]}'.split(",")
-
           if (!chartEl.newPieChart) {
-            console.log("Initialize piechart")
+            console.log("Initialize piechart. chartEl?: ", chartEl)
             var newPieChart = new Chart(ctx, {
+              responsive: true,
+              maintainAspectRatio: true,
               type: 'pie',
               data: {
                   labels: strLabelData,
@@ -89,6 +90,7 @@ export default (editor, opt = {}) => {
         var valChangeStr = Object.keys(sectionDataObj).map(item => 'change:' + item).join(" ");
         this.listenTo(this.model, colorChangeStr, function() {return this.updateChart('color')});
         this.listenTo(this.model, valChangeStr, function() {return this.updateChart('data')});
+
       },
       updateChart(changeType) {
         if (changeType === 'color') {

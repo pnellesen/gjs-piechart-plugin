@@ -54,6 +54,7 @@ export default (editor, opt = {}) => {
           var strValData = '{[ strValData ]}'.split(",")
           var strLabelData = '{[ strLabelData ]}'.split(",")
           var blnInitChart = '{[ blnInitChart ]}'
+          console.log("blnInitChart: ", blnInitChart)
           if (blnInitChart) {
             console.log("Initialize Chart")
             var newPieChart = new Chart(ctx, {
@@ -68,6 +69,7 @@ export default (editor, opt = {}) => {
               });
               chartEl.newPieChart = newPieChart;
           } else {
+            console.log("Update Chart")
             chartEl.newPieChart.data.datasets = [{
               backgroundColor: strColorData,
               data: strValData
@@ -92,6 +94,7 @@ export default (editor, opt = {}) => {
         this.listenTo(this.model, valChangeStr, function() {return this.updateChart('data')});
       },
       updateChart(changeType) {
+        console.log("update chart - blnInitChart? ", this.model.attributes.blnInitChart)
         if (this.model.attributes.blnInitChart) this.model.attributes.blnInitChart = false;
         if (changeType === 'color') {
           var newColorData = traitColorData.map(item => this.model.attributes[item.name])
@@ -101,7 +104,7 @@ export default (editor, opt = {}) => {
           this.model.attributes['strValData'] = newValData;
         }
         this.updateScript();
-        
+
       }
     }),
   });

@@ -6,6 +6,44 @@ export default (editor, opt = {}) => {
   const piechartType = 'piechart';
   const chartData = c.optChartData || [{"name":"defaultName","label":"No data","data":1,"color":"#ccc"}];
 
+  // Start new trait definition
+  editor.TraitManager.addType('piepiece', {
+    events:{
+      'keyup': 'onChange',  // trigger parent onChange method on keyup
+    },
+   inputHtml: `
+        <div><span>Label: </span><span style="background-color:#cccccc"><input type="text" id="piePieceLabel"></span></div>
+        <div><span>Color: </span><span><input type="text" id="piePieceColorVal" value=""><input type="color" id="piePieceColorPicker" value=""></span></div>
+        <div><span>Value: </span><span><input type="number" id="piePieceNumber" value=""></span></div>
+    `,
+    /**
+    * Returns the input element
+    * @return {HTMLElement}
+    */
+    getInputEl: function() {
+      console.log("pie piece - data? ", this.model.attributes.data);
+      if (!this.inputEl) {
+        var input = document.createElement('div');
+        input.innerHTML = this.inputHtml,
+        this.inputEl = input;
+        console.log("model value? ", this.model.get('value'));
+        this.model.set('value',this.model.attributes.data);
+      }
+      return this.inputEl;
+    },
+  
+    /**
+     * Triggered when the value of the model is changed
+     */
+    onValueChange: function () {
+      //this.target.set('content', this.model.get('value'));
+      console.log("pie piece data changed: ", this.model.get('value'))
+    }
+  });
+  // end new trait def
+
+
+
   //Setup the attributes and data for traits
   const colorDataObj = {}
   const sectionDataObj = {}
@@ -29,13 +67,14 @@ export default (editor, opt = {}) => {
         droppable: true,
         copyable: true,
         removable: true,
-        //resizable: true,
+        resizable: true,
 
         // stuff for trait/settings manager
         ...colorDataObj,
         ...sectionDataObj,
 
         traits: [
+          {type: 'piepiece', label: 'Pie Piece', data: {label: 'M', color: '#cccccc', val: '12'}},
           ...traitColorData,// deconstruct color data
           ...traitValData, //deconstruct value data
         ],

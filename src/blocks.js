@@ -7,7 +7,7 @@ export default (editor, config = {}) => {
 
  bm.add('piechart', {
   label: 'Pie Chart',
-  content: '<div class="chart-container" style="position: relative;height:500px;width:500px;resize:both;overflow:auto"><canvas data-gjs-type="piechart"></canvas></div>',
+  content: '<div class="chart-container" style="position: relative;height:350px;width:500px;"><canvas data-gjs-type="piechart"></canvas></div>',
   category: 'Extra'
  })
 

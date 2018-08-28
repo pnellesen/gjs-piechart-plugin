@@ -35,8 +35,6 @@ export default (editor, opt = {}) => {
         ...colorDataObj,
         ...sectionDataObj,
 
-        blnInitChart: true,
-
         traits: [
           ...traitColorData,// deconstruct color data
           ...traitValData, //deconstruct value data
@@ -53,10 +51,9 @@ export default (editor, opt = {}) => {
           var strColorData = '{[ strColorData ]}'.split(",");
           var strValData = '{[ strValData ]}'.split(",")
           var strLabelData = '{[ strLabelData ]}'.split(",")
-          var blnInitChart = '{[ blnInitChart ]}'
-          console.log("blnInitChart: ", blnInitChart)
-          if (blnInitChart) {
-            console.log("Initialize Chart")
+
+          if (!chartEl.newPieChart) {
+            console.log("Initialize piechart")
             var newPieChart = new Chart(ctx, {
               type: 'pie',
               data: {
@@ -69,7 +66,7 @@ export default (editor, opt = {}) => {
               });
               chartEl.newPieChart = newPieChart;
           } else {
-            console.log("Update Chart")
+            console.log("We have pieChart: do update")
             chartEl.newPieChart.data.datasets = [{
               backgroundColor: strColorData,
               data: strValData
@@ -94,8 +91,6 @@ export default (editor, opt = {}) => {
         this.listenTo(this.model, valChangeStr, function() {return this.updateChart('data')});
       },
       updateChart(changeType) {
-        console.log("update chart - blnInitChart? ", this.model.attributes.blnInitChart)
-        if (this.model.attributes.blnInitChart) this.model.attributes.blnInitChart = false;
         if (changeType === 'color') {
           var newColorData = traitColorData.map(item => this.model.attributes[item.name])
           this.model.attributes['strColorData'] = newColorData;
@@ -104,7 +99,6 @@ export default (editor, opt = {}) => {
           this.model.attributes['strValData'] = newValData;
         }
         this.updateScript();
-
       }
     }),
   });

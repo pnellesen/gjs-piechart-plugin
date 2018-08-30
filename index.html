@@ -4,7 +4,7 @@
         <link rel="stylesheet" href="http://unpkg.com/grapesjs/dist/css/grapes.min.css">
         <link rel="stylesheet" href="styles.css">
         <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.min.js"></script>
+        <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.min.js"></script>-->
         <script src="http://unpkg.com/grapesjs"></script>
         <script src="dist/gjs-ignite-piechart.min.js"></script>
         <script src="grapesjs-component-countdown.min.js"></script>
@@ -24,36 +24,6 @@
         </div>
         <div id="blocks"></div>
 
-        <!-- placeholder chart here, for validating that it works
-
-
-        <div class="chart" style="width:500px;height:800px">
-            <canvas id="myPieChart" height="250" width="400"></canvas>
-        </div>
-
-
-        <script>
-        var ctx = document.getElementById("myPieChart");
-        var myPieChart = new Chart(ctx, {
-        type: 'pie',
-        data: {
-            labels: ["M", "T", "W", "T", "F", "S", "S"],
-            datasets: [{
-                backgroundColor: [
-                "#f56954",
-                "#00a65a",
-                "#f39c12",
-                "#00c0ef",
-                "#3c8dbc",
-                "#ca195a",
-                "#d2d6de"
-                ],
-                data: [12, 19, 3, 17, 28, 24, 7]
-            }]
-            }
-        });
-        </script>
-        <!-- // End chart -->
         <script type="text/javascript">
             const editor = grapesjs.init({
                 // Indicate where to init the editor. You can also pass an HTMLElement
@@ -80,7 +50,7 @@
                 },
                 canvas: {
                     scripts:[
-	        		'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.min.js'// v2.6+ required to drag/drop charts into the grapesJS canvas
+	        		//'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.min.js'// v2.6+ required to drag/drop charts into the grapesJS canvas
 	        	],
                 },
                 //Blocks

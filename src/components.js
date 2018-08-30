@@ -5,16 +5,16 @@ export default (editor, opt = {}) => {
   const defaultModel = defaultType.model;
   const piechartType = 'piechart';
   const chartData = c.optChartData || [{"name":"defaultName","label":"No data","data":1,"color":"#ccc"}];
-
+  const defaultChartJSUrl = c.defaultChartJSUrl || '';
   //Setup the attributes and data for traits
   const colorDataObj = {}
   const sectionDataObj = {}
-  const piepieceDataObj = {}
   chartData.map(item => {
     colorDataObj['color' + item.name]= item.color;
     sectionDataObj['data' + item.name] = item.data;
-    piepieceDataObj['piepiece' + item.name] = {label: item.name, color: item.color, val: item.data};
   });
+
+  /* Keep these if we want to go back and use GrapesJS built-in color/number pickers
 
   const traitColorData = chartData.map((item) => {
     return ({name:`${'color' + item.name}`, label:item.label, changeProp: 1, type: 'color'})
@@ -22,10 +22,12 @@ export default (editor, opt = {}) => {
   const traitValData = chartData.map((item) => {
     return ({name:`${'data' + item.name}`, label:item.label, changeProp: 1, type: 'number'})
   })
+  */
 
   const traitPiepieceData = chartData.map((item) => {
     return ({name:`${'piepiece' + item.name}`, label:item.label, changeProp: 1, type: 'piepiece', data: {label: item.label, color: item.color, colorName: 'color' + item.name, val: item.data, valName: 'data' + item.name}})
   })
+
   // End trait/settings data setup
   dc.addType(piechartType, {
     model: defaultModel.extend({
@@ -41,31 +43,52 @@ export default (editor, opt = {}) => {
         // stuff for trait/settings manager
         ...colorDataObj,
         ...sectionDataObj,
-        //...piepieceDataObj,
         traits: [
-          //{type: 'piepiece', label: 'Pie Piece', data: {label: 'M', color: '#cccccc', val: '12'}},
+          {name: 'pichartData', label:"All Data", type:'text', value: JSON.stringify(chartData)},
           ...traitPiepieceData,
-          //...traitColorData,// deconstruct color data
-          //...traitValData, //deconstruct value data
+          //...traitColorData,// deconstruct color data, insert picker into trait manager
+          //...traitValData, //deconstruct value data, insert picker into trait manager
         ],
         // end trait/settings setup
 
         // set up variables for javascript function, per GrapesJS docs
+        strChartJSUrl: defaultChartJSUrl,
         strColorData: Object.keys(colorDataObj).map(item => colorDataObj[item]),
         strValData: Object.keys(sectionDataObj).map(item => sectionDataObj[item]),
         strLabelData: Object.keys(chartData).map(item => chartData[item].label),
-        //strPiepieceData: Object.keys(piepieceDataObj).map(item => item),
+
         script: function () {
           var chartEl = this;
           var ctx = chartEl.getContext("2d");
           var strColorData = '{[ strColorData ]}'.split(",");
           var strValData = '{[ strValData ]}'.split(",")
           var strLabelData = '{[ strLabelData ]}'.split(",")
-          var strPiePieceData = '{[ strPiepieceData ]}'.split(",")
-          console.log("strPiePieceData: ", strPiePieceData)
-          if (!chartEl.newPieChart) {
-            //console.log("Initialize piechart. chartEl?: ", chartEl)
-            var newPieChart = new Chart(ctx, {
+
+          if (typeof Chart == 'undefined') {
+            /**
+             *  If the ChartJS file isn't loaded via the canvas.scripts object in index.html, add it to the canvas using default
+             *  defined in index.js file, then initialize the pieChart
+             */
+            loadChartScript('{[ strChartJSUrl ]}', initPieChart);
+          } else if (!chartEl.newPieChart) {
+            initPieChart()
+          } else {
+            updatePieChart()
+          }
+
+          function loadChartScript(url, callback) {
+            console.log("loading chart script from default url: " + url)
+            var script = document.createElement('script');
+            script.src = url;
+            script.type="text/javascript"
+            script.onreadystatechange = callback;
+            script.onload = callback;
+            document.body.appendChild(script);
+          }
+
+          function initPieChart() {
+            console.log("Initializing pie chart")
+            chartEl.newPieChart = new Chart(ctx, {
               responsive: true,
               maintainAspectRatio: true,
               type: 'pie',
@@ -77,14 +100,14 @@ export default (editor, opt = {}) => {
                   }]
                   }
               });
-              chartEl.newPieChart = newPieChart;
-          } else {
-            //console.log("We have pieChart: do update")
+          }
+          function updatePieChart() {
+            console.log("Update piechart")
             chartEl.newPieChart.data.datasets = [{
               backgroundColor: strColorData,
               data: strValData
             }];
-            chartEl.newPieChart.update({duration: 0});
+            chartEl.newPieChart.update({duration: 300});
           }
         },
       },
@@ -108,68 +131,72 @@ export default (editor, opt = {}) => {
       updateChart(changeType) {
         console.log("updateChart: ", changeType)
         if (changeType === 'color') {
-          var newColorData = traitColorData.map(item => this.model.attributes[item.name])
+          var newColorData = chartData.map(item => this.model.attributes['color' + item.name])
           this.model.attributes['strColorData'] = newColorData;
         } else if (changeType === 'data') {
-          var newValData = traitValData.map(item => this.model.attributes[item.name])
+          var newValData = chartData.map(item => this.model.attributes['data' + item.name])
           this.model.attributes['strValData'] = newValData;
         }
         this.updateScript();
       }
     }),
   });
- 
-  // Start new trait definition
+
+  // Start new piepiece trait here. May want to put into a separate file
+
   editor.TraitManager.addType('piepiece', {
     events:{
       //'keyup': 'onChange',  // trigger parent onChange method on keyup
     },
     inputHtml: `
         <div><span>Label: </span><span><input type="text" class="piePieceLabel" value=""></span></div>
-        <div><span>Color: </span><span><input type="text" class="piePieceColorVal" value=""><input type="color" class="piePieceColorPicker" value=""></span></div>
-        <div><span>Value: </span><span><input type="number" class="piePieceNumber" value=""></span></div>
+        <div><span>Color: </span><span><input type="text" class="piePieceColorVal" style="border:1px solid #9e9e9e"><input type="color" class="piePieceColorPicker" style="width:35px;height:35px;cursor:pointer"></span></div>
+        <div><span>Value: </span><span><input type="number" class="piePieceNumber" value="" style="border:1px solid #9e9e9e"></span></div>
     `,
     /**
     * Returns the input element
     * @return {HTMLElement}
     */
     getInputEl: function() {
-      console.log("pie piece - this? ", this);
       if (!this.inputEl) {
         var input = document.createElement('div');
         var thisModel = this.model;
         var thisTarget = this.target;
         input.innerHTML = this.inputHtml,
         this.inputEl = input;
-        this.pickerEl = input.querySelector(".piePieceColorPicker");
-        this.pickerEl.id = "ppcp" + this.cid;
-        this.labelEl = input.querySelector(".piePieceLabel")
-        this.labelEl.id = "pplbl" + this.cid;
-        this.valEl = input.querySelector(".piePieceNumber")
-        this.valEl.id = "ppn" + this.cid
-        this.pickerEl.value = thisModel.attributes.data.color
-        this.labelEl.value = thisModel.attributes.data.label
-        this.valEl.value = thisModel.attributes.data.val
-        this.pickerEl.onchange = function() {
+        var pickerEl = input.querySelector(".piePieceColorPicker");
+        pickerEl.id = "ppcp" + this.cid;
+        var pickerTextField = input.querySelector(".piePieceColorVal")
+        pickerTextField.id = "ptv" + this.cid
+        var labelEl = input.querySelector(".piePieceLabel")
+        labelEl.id = "pplbl" + this.cid;
+        var valEl = input.querySelector(".piePieceNumber")
+        valEl.id = "ppn" + this.cid
+        pickerEl.value = thisTarget.attributes[thisModel.attributes.data.colorName]
+        pickerTextField.value = pickerEl.value
+        labelEl.value = thisModel.attributes.data.label
+        valEl.value = thisTarget.attributes[thisModel.attributes.data.valName]
+        pickerEl.onchange = function() {
             colorChange(this.value)
         }
-        this.valEl.onchange = function() {
+        pickerTextField.onkeyup = function(evt) {
+          if (evt.key == 'Enter') colorChange(this.value)
+        }
+        pickerTextField.onblur = function() {
+          colorChange(this.value)
+        }
+        valEl.onchange = function() {
           valueChange(this.value)
         }
-        var currentData = thisModel.attributes.data;
         function colorChange(newColor) {
-          var newData = {...currentData, color: newColor}
-          thisModel.set('value', newData);
+          pickerEl.value = newColor;
+          pickerTextField.value = newColor;
+          thisTarget.attributes[thisModel.attributes.data.colorName] = newColor
+          thisTarget.view.updateChart('color')
         }
         function valueChange(newVal) {
-          var newData = {...currentData, val: newVal}
-          thisModel.set('value', newData);
           thisTarget.attributes[thisModel.attributes.data.valName] = newVal
-
-          //thisTarget.setAttributes({ id: thisModel.attributes.data.valName, 'data-key': newVal });
-
-          console.log("valueChange - target view? ", thisTarget.view.updateChart('data'))
-          console.log("valueChange - strValData? ", thisTarget.attributes[thisModel.attributes.data.valName])
+          thisTarget.view.updateChart('data')
         }
       }
       return this.inputEl;

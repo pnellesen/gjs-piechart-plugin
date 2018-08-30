@@ -5,8 +5,9 @@ import loadBlocks from './blocks';
 export default grapesjs.plugins.add('gjs-ignite-piechart', (editor, opts = {}) => {
   const options = { ...{
     // default options
+    defaultChartJSUrl: 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.min.js'
   },  ...opts };
-  console.log("option data? ", opts);
+
   // Add blocks
   loadBlocks(editor, options);
 

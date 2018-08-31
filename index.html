@@ -45,12 +45,13 @@
                         //option here
                     },
                     'gjs-ignite-piechart': {
-                        optChartData: [{"name":"nameM","label":"M","data":12,"color":"#f56954"},{"name":"nameT","label":"T","data":19,"color":"#00a65a"},{"name":"nameW","label":"W","data":3,"color":"#f39c12"},{"name":"nameTh","label":"Th","data":17,"color":"#00c0ef"},{"name":"nameF","label":"F","data":28,"color":"#3c8dbc"},{"name":"nameSa","label":"Sa","data":24,"color":"#ca195a"},{"name":"nameSu","label":"Su","data":7,"color":"#d2d6de"}]
+                        optChartData: [{"name":"nameM","label":"M","data":12,"color":"#f56954"},{"name":"nameT","label":"T","data":19,"color":"#00a65a"},{"name":"nameW","label":"W","data":3,"color":"#f39c12"},{"name":"nameTh","label":"Th","data":17,"color":"#00c0ef"},{"name":"nameF","label":"F","data":28,"color":"#3c8dbc"},{"name":"nameSa","label":"Sa","data":24,"color":"#ca195a"},{"name":"nameSu","label":"Su","data":7,"color":"#d2d6de"}],
+                        optChartDataUrl: 'http://localhost:8424/data/piechart.json'
                     }
                 },
                 canvas: {
                     scripts:[
-	        		//'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.min.js'// v2.6+ required to drag/drop charts into the grapesJS canvas
+	        		'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.min.js'// v2.6+ required to drag/drop charts into the grapesJS canvas
 	        	],
                 },
                 //Blocks
@@ -61,10 +62,7 @@
                         id: 'section', // id is mandatory
                         label: '<b>Section</b>', // You can use HTML/SVG inside labels
                         attributes: { class:'gjs-block-section' },
-                        content: `<section>
-                        <h1>This is a simple title</h1>
-                        <div>This is just a Lorem text: Lorem ipsum dolor sit amet</div>
-                        </section>`,
+                        content: '<section><h1>This is a simple title</h1><div>This is just a Lorem text: Lorem ipsum dolor sit amet</div></section>',
                         category: 'Standard'
                     }, {
                         id: 'text',
@@ -103,7 +101,7 @@
                         className: 'btn-paste-modal',
                         label: 'Paste',
                         context: 'paste-modal',
-                        command(editor) {
+                        command: function(editor) {
                             console.log("Paste")
                             editor.addComponents($('#myText').val());
                             editor.Modal.close();

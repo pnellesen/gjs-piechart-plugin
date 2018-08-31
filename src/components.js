@@ -5,6 +5,7 @@ export default (editor, opt = {}) => {
   const defaultModel = defaultType.model;
   const piechartType = 'piechart';
   const chartData = c.optChartData || [{"name":"defaultName","label":"No data","data":1,"color":"#ccc"}];
+  const chartDataUrl = c.optChartDataUrl || null;
   const defaultChartJSUrl = c.defaultChartJSUrl || '';
   //Setup the attributes and data for traits
   const colorDataObj = {}
@@ -13,7 +14,9 @@ export default (editor, opt = {}) => {
     colorDataObj['color' + item.name]= item.color;
     sectionDataObj['data' + item.name] = item.data;
   });
-
+  
+  
+  
   /* Keep these if we want to go back and use GrapesJS built-in color/number pickers
 
   const traitColorData = chartData.map((item) => {
@@ -66,13 +69,19 @@ export default (editor, opt = {}) => {
 
           if (typeof Chart == 'undefined') {
             /**
-             *  If the ChartJS file isn't loaded via the canvas.scripts object in index.html, add it to the canvas using default
-             *  defined in index.js file, then initialize the pieChart
+             *  If the ChartJS file hasn't already been loaded via the canvas.scripts object in index.html,
+             *  add it to the canvas asynchronously using default url defined in index.js file,
+             *  then initialize the pieChart
              */
-            loadChartScript('{[ strChartJSUrl ]}', initPieChart);
+              loadChartScript('{[ strChartJSUrl ]}', initPieChart);
           } else if (!chartEl.newPieChart) {
+            /**
+             * If ChartJS has been loaded, but we haven't yet created the Chart object, 
+             * initialize it with default parameters
+             */
             initPieChart()
           } else {
+            // We have a Chart object, so we just need to update it
             updatePieChart()
           }
 
@@ -149,9 +158,9 @@ export default (editor, opt = {}) => {
       //'keyup': 'onChange',  // trigger parent onChange method on keyup
     },
     inputHtml: `
-        <div><span>Label: </span><span><input type="text" class="piePieceLabel" value=""></span></div>
-        <div><span>Color: </span><span><input type="text" class="piePieceColorVal" style="border:1px solid #9e9e9e"><input type="color" class="piePieceColorPicker" style="width:35px;height:35px;cursor:pointer"></span></div>
-        <div><span>Value: </span><span><input type="number" class="piePieceNumber" value="" style="border:1px solid #9e9e9e"></span></div>
+        <div style="margin:10px;margin-bottom:0">Label: <input type="text" class="piePieceLabel" value="" style="border:1px solid #9e9e9e;"></div>
+        <div style="margin:10px"><div>Color: </div><div style="white-space:nowrap"><input type="text" class="piePieceColorVal" style="border:1px solid #9e9e9e; width:70%"><input type="color" class="piePieceColorPicker" style="width:35px;height:35px;top:3px;cursor:pointer"></div></div>
+        <div style="margin:10px;"><div>Value: </div><div><input type="number" class="piePieceNumber" value="" style="border:1px solid #9e9e9e"></div></div>
     `,
     /**
     * Returns the input element
@@ -162,6 +171,8 @@ export default (editor, opt = {}) => {
         var input = document.createElement('div');
         var thisModel = this.model;
         var thisTarget = this.target;
+        var thisColorPicker = editor.TraitManager.getType('color');
+        console.log("editor colorpicker?: ", thisColorPicker);
         input.innerHTML = this.inputHtml,
         this.inputEl = input;
         var pickerEl = input.querySelector(".piePieceColorPicker");

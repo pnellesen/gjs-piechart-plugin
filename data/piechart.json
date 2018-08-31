@@ -1,0 +1,9 @@
+[
+    {"name":"nameM","label":"M","data":12,"color":"#f56954"},
+    {"name":"nameT","label":"T","data":19,"color":"#00a65a"},
+    {"name":"nameW","label":"W","data":3,"color":"#f39c12"},
+    {"name":"nameTh","label":"Th","data":17,"color":"#00c0ef"},
+    {"name":"nameF","label":"F","data":28,"color":"#3c8dbc"},
+    {"name":"nameSa","label":"Sa","data":24,"color":"#ca195a"},
+    {"name":"nameSu","label":"Su","data":7,"color":"#d2d6de"}
+]

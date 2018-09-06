@@ -28,7 +28,7 @@ export default (editor, opt = {}) => {
   */
 
   const traitPiepieceData = chartData.map((item) => {
-    return ({name:`${'piepiece' + item.name}`, label:item.label, changeProp: 1, type: 'piepiece', data: {label: item.label, color: item.color, colorName: 'color' + item.name, val: item.data, valName: 'data' + item.name}})
+    return ({name:`${'piepiece' + item.name}`, label:item.label, changeProp: 0, type: 'piepiece', data: {label: item.label, color: item.color, colorName: 'color' + item.name, val: item.data, valName: 'data' + item.name}, value:item.color})
   })
 
   // End trait/settings data setup
@@ -157,9 +157,9 @@ export default (editor, opt = {}) => {
     events:{
       //'keyup': 'onChange',  // trigger parent onChange method on keyup
     },
-    inputHtml: `
+   inputHtml: `
         <div style="margin:10px;margin-bottom:0">Label: <input type="text" class="piePieceLabel" value="" style="border:1px solid #9e9e9e;"></div>
-        <div style="margin:10px"><div>Color: </div><div style="white-space:nowrap"><input type="text" class="piePieceColorVal" style="border:1px solid #9e9e9e; width:70%"><input type="color" class="piePieceColorPicker" style="width:35px;height:35px;top:3px;cursor:pointer"></div></div>
+        <div style="margin:10px"><div>Color: </div><div style="white-space:nowrap"><input type="text" class="piePieceColorVal" style="border:1px solid #9e9e9e; width:70%"><div class="piePieceColorPicker" style="width:35px;height:35px;top:3px;cursor:pointer;position:relative;" data-colorp-c></div></div></div>
         <div style="margin:10px;"><div>Value: </div><div><input type="number" class="piePieceNumber" value="" style="border:1px solid #9e9e9e"></div></div>
     `,
     /**
@@ -171,12 +171,20 @@ export default (editor, opt = {}) => {
         var input = document.createElement('div');
         var thisModel = this.model;
         var thisTarget = this.target;
-        var thisColorPicker = editor.TraitManager.getType('color');
-        console.log("editor colorpicker?: ", thisColorPicker);
+
+        // Setup our jQuery spectrum colorpicker using the already existing implementation in grapesJs
+        var that = this
+        var thisColorPicker = function() {
+          return editor.TraitManager.getType('color').prototype.getInputEl.apply(that, arguments);
+        }
+
         input.innerHTML = this.inputHtml,
         this.inputEl = input;
         var pickerEl = input.querySelector(".piePieceColorPicker");
         pickerEl.id = "ppcp" + this.cid;
+        
+        pickerEl.appendChild(thisColorPicker());// add the jQuery spectrum color picker to our trait editor
+
         var pickerTextField = input.querySelector(".piePieceColorVal")
         pickerTextField.id = "ptv" + this.cid
         var labelEl = input.querySelector(".piePieceLabel")
@@ -188,7 +196,8 @@ export default (editor, opt = {}) => {
         labelEl.value = thisModel.attributes.data.label
         valEl.value = thisTarget.attributes[thisModel.attributes.data.valName]
         pickerEl.onchange = function() {
-            colorChange(this.value)
+            //colorChange(this.value)
+            colorChange(thisModel.get('value'))
         }
         pickerTextField.onkeyup = function(evt) {
           if (evt.key == 'Enter') colorChange(this.value)

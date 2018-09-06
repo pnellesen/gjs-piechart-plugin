@@ -196,14 +196,14 @@ export default (editor, opt = {}) => {
         labelEl.value = thisModel.attributes.data.label
         valEl.value = thisTarget.attributes[thisModel.attributes.data.valName]
         pickerEl.onchange = function() {
-            //colorChange(this.value)
             colorChange(thisModel.get('value'))
         }
         pickerTextField.onkeyup = function(evt) {
           if (evt.key == 'Enter') colorChange(this.value)
         }
         pickerTextField.onblur = function() {
-          colorChange(this.value)
+          thisModel.set('value',this.value);
+          colorChange(thisModel.get('value'))
         }
         valEl.onchange = function() {
           valueChange(this.value)

@@ -159,7 +159,7 @@ export default (editor, opt = {}) => {
     },
    inputHtml: `
         <div style="margin:10px;margin-bottom:0">Label: <input type="text" class="piePieceLabel" value="" style="border:1px solid #9e9e9e;"></div>
-        <div style="margin:10px"><div>Color: </div><div style="white-space:nowrap"><input type="text" class="piePieceColorVal" style="border:1px solid #9e9e9e; width:70%"><div class="piePieceColorPicker" style="width:35px;height:35px;top:3px;cursor:pointer;position:relative;" data-colorp-c></div></div></div>
+        <div style="margin:10px"><div>Color: </div><div style="white-space:nowrap"><input type="text" class="piePieceColorVal" style="border:1px solid #9e9e9e; width:70%"><div class="piePieceColorPicker" style="width: 20px;height: 20px;top: 6px;left: 5px;cursor: pointer;position: relative;display: inline-block;" data-colorp-c></div></div></div>
         <div style="margin:10px;"><div>Value: </div><div><input type="number" class="piePieceNumber" value="" style="border:1px solid #9e9e9e"></div></div>
     `,
     /**

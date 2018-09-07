@@ -14,9 +14,9 @@ export default (editor, opt = {}) => {
     colorDataObj['color' + item.name]= item.color;
     sectionDataObj['data' + item.name] = item.data;
   });
-  
-  
-  
+
+
+
   /* Keep these if we want to go back and use GrapesJS built-in color/number pickers
 
   const traitColorData = chartData.map((item) => {
@@ -56,14 +56,14 @@ export default (editor, opt = {}) => {
 
         // set up variables for javascript function, per GrapesJS docs
         strChartJSUrl: defaultChartJSUrl,
-        strColorData: Object.keys(colorDataObj).map(item => colorDataObj[item]),
+        strColorData: Object.keys(colorDataObj).map(item => colorDataObj[item]).join("-"),
         strValData: Object.keys(sectionDataObj).map(item => sectionDataObj[item]),
         strLabelData: Object.keys(chartData).map(item => chartData[item].label),
 
         script: function () {
           var chartEl = this;
           var ctx = chartEl.getContext("2d");
-          var strColorData = '{[ strColorData ]}'.split(",");
+          var strColorData = '{[ strColorData ]}'.split("-");
           var strValData = '{[ strValData ]}'.split(",")
           var strLabelData = '{[ strLabelData ]}'.split(",")
 
@@ -76,7 +76,7 @@ export default (editor, opt = {}) => {
               loadChartScript('{[ strChartJSUrl ]}', initPieChart);
           } else if (!chartEl.newPieChart) {
             /**
-             * If ChartJS has been loaded, but we haven't yet created the Chart object, 
+             * If ChartJS has been loaded, but we haven't yet created the Chart object,
              * initialize it with default parameters
              */
             initPieChart()
@@ -140,7 +140,7 @@ export default (editor, opt = {}) => {
       updateChart(changeType) {
         console.log("updateChart: ", changeType)
         if (changeType === 'color') {
-          var newColorData = chartData.map(item => this.model.attributes['color' + item.name])
+          var newColorData = chartData.map(item => this.model.attributes['color' + item.name]).join("-")
           this.model.attributes['strColorData'] = newColorData;
         } else if (changeType === 'data') {
           var newValData = chartData.map(item => this.model.attributes['data' + item.name])
@@ -182,7 +182,7 @@ export default (editor, opt = {}) => {
         this.inputEl = input;
         var pickerEl = input.querySelector(".piePieceColorPicker");
         pickerEl.id = "ppcp" + this.cid;
-        
+
         pickerEl.appendChild(thisColorPicker());// add the jQuery spectrum color picker to our trait editor
 
         var pickerTextField = input.querySelector(".piePieceColorVal")

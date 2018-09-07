@@ -171,25 +171,20 @@ export default (editor, opt = {}) => {
         var input = document.createElement('div');
         var thisModel = this.model;
         var thisTarget = this.target;
-
-        // Setup our jQuery spectrum colorpicker using the already existing implementation in grapesJs
-        var that = this
-        var thisColorPicker = function() {
-          return editor.TraitManager.getType('color').prototype.getInputEl.apply(that, arguments);
-        }
-
-        input.innerHTML = this.inputHtml,
-        this.inputEl = input;
-        var pickerEl = input.querySelector(".piePieceColorPicker");
+        input.innerHTML = this.inputHtml
+        var inputEl = input;
+        var pickerEl = inputEl.querySelector(".piePieceColorPicker");
         pickerEl.id = "ppcp" + this.cid;
+        if (!this.model.colorPickerEl) {// add the jQuery spectrum color picker to our trait editor
+          this.model.colorPickerEl = editor.TraitManager.getType('color').prototype.getInputEl.apply(this, arguments);
+        }
+        pickerEl.appendChild(this.model.colorPickerEl)
 
-        pickerEl.appendChild(thisColorPicker());// add the jQuery spectrum color picker to our trait editor
-
-        var pickerTextField = input.querySelector(".piePieceColorVal")
+        var pickerTextField = inputEl.querySelector(".piePieceColorVal")
         pickerTextField.id = "ptv" + this.cid
-        var labelEl = input.querySelector(".piePieceLabel")
+        var labelEl = inputEl.querySelector(".piePieceLabel")
         labelEl.id = "pplbl" + this.cid;
-        var valEl = input.querySelector(".piePieceNumber")
+        var valEl = inputEl.querySelector(".piePieceNumber")
         valEl.id = "ppn" + this.cid
         pickerEl.value = thisTarget.attributes[thisModel.attributes.data.colorName]
         pickerTextField.value = pickerEl.value
@@ -218,7 +213,9 @@ export default (editor, opt = {}) => {
           thisTarget.attributes[thisModel.attributes.data.valName] = newVal
           thisTarget.view.updateChart('data')
         }
+        this.inputEl = inputEl
       }
+      console.log("inputEl? ", this.inputEl)
       return this.inputEl;
     },
 

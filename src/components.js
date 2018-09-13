@@ -161,6 +161,7 @@ export default (editor, opt = {}) => {
         <div style="margin:10px;margin-bottom:0">Label: <input type="text" class="piePieceLabel" value="" style="border:1px solid #9e9e9e;"></div>
         <div style="margin:10px"><div>Color: </div><div style="white-space:nowrap"><input type="text" class="piePieceColorVal" style="border:1px solid #9e9e9e; width:70%"><div class="piePieceColorPicker" style="width: 20px;height: 20px;top: 6px;left: 5px;cursor: pointer;position: relative;display: inline-block;" data-colorp-c></div></div></div>
         <div style="margin:10px;"><div>Value: </div><div><input type="number" class="piePieceNumber" value="" style="border:1px solid #9e9e9e"></div></div>
+        <div class="gjsNumberPickerDiv" style="margin:10px;"></div>
     `,
     /**
     * Returns the input element
@@ -175,10 +176,32 @@ export default (editor, opt = {}) => {
         var inputEl = input;
         var pickerEl = inputEl.querySelector(".piePieceColorPicker");
         pickerEl.id = "ppcp" + this.cid;
+
         if (!this.model.colorPickerEl) {// add the jQuery spectrum color picker to our trait editor
           this.model.colorPickerEl = editor.TraitManager.getType('color').prototype.getInputEl.apply(this, arguments);
         }
         pickerEl.appendChild(this.model.colorPickerEl)
+        
+        // Add grapesJS NumberInput to settings - is IE11 compatible
+        var numberPickerDiv = inputEl.querySelector(".gjsNumberPickerDiv");
+        if (!this.model.numberPickerEl) {
+          var pickerObj = this
+          pickerObj.$input = null
+          pickerObj.model.attributes.value = thisTarget.attributes[thisModel.attributes.data.valName]
+          
+          this.model.numberPickerEl = editor.TraitManager.getType('number').prototype.getInputEl.apply(pickerObj, arguments)
+          this.model.numberChangerDiv = pickerObj.input.$el[0];
+          //console.log("Number Input? ", )
+        }
+        numberPickerDiv.appendChild(this.model.numberChangerDiv)
+        var numberPickerInput = numberPickerDiv.querySelector("input")
+        console.log("NumberPickerInput value?: ", numberPickerInput.value)
+          
+        numberPickerInput.onchange = function () {
+          
+        }
+        // END numberInput 
+
 
         var pickerTextField = inputEl.querySelector(".piePieceColorVal")
         pickerTextField.id = "ptv" + this.cid
@@ -186,12 +209,25 @@ export default (editor, opt = {}) => {
         labelEl.id = "pplbl" + this.cid;
         var valEl = inputEl.querySelector(".piePieceNumber")
         valEl.id = "ppn" + this.cid
+
         pickerEl.value = thisTarget.attributes[thisModel.attributes.data.colorName]
         pickerTextField.value = pickerEl.value
         labelEl.value = thisModel.attributes.data.label
         valEl.value = thisTarget.attributes[thisModel.attributes.data.valName]
+        
         pickerEl.onchange = function() {
+          console.log("pickerEl changed: ", this, " - event: ", event)
+          
             colorChange(thisModel.get('value'))
+            thisModel.attributes.value = thisModel.attributes.data.val
+            numberPickerInput.value = thisModel.attributes.data.val
+            console.log("NumberPickerInput value?: ", numberPickerInput.value)
+            
+            
+        }
+
+        numberPickerDiv.onchange = function() {
+          console.log("numberPicker changed: event? ", event)
         }
         pickerTextField.onkeyup = function(evt) {
           if (evt.key == 'Enter') colorChange(this.value)
@@ -201,6 +237,7 @@ export default (editor, opt = {}) => {
           colorChange(thisModel.get('value'))
         }
         valEl.onchange = function() {
+          console.log("valEl changed: ", this.value)
           valueChange(this.value)
         }
         function colorChange(newColor) {
@@ -213,6 +250,9 @@ export default (editor, opt = {}) => {
           thisTarget.attributes[thisModel.attributes.data.valName] = newVal
           thisTarget.view.updateChart('data')
         }
+
+
+        
         this.inputEl = inputEl
       }
       console.log("inputEl? ", this.inputEl)
@@ -223,8 +263,8 @@ export default (editor, opt = {}) => {
      * Triggered when the value of the model is changed
      */
     onValueChange: function () {
-      //this.target.set('content', this.model.get('value'));
-      console.log("pie piece data changed: ", this.model.get('value'), " - target? ", this.target)
+      
+      console.log("pie piece data changed: ", this.model.get('value'), " - target? ", this.target, " - event? ", event)
     }
   });
   // end new trait def

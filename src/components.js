@@ -159,8 +159,17 @@ export default (editor, opt = {}) => {
     },
    inputHtml: `
         <div style="margin:10px;margin-bottom:0">Label: <input type="text" class="piePieceLabel" value="" style="border:1px solid #9e9e9e;"></div>
-        <div style="margin:10px"><div>Color: </div><div style="white-space:nowrap"><input type="text" class="piePieceColorVal" style="border:1px solid #9e9e9e; width:70%"><div class="piePieceColorPicker" style="width: 20px;height: 20px;top: 6px;left: 5px;cursor: pointer;position: relative;display: inline-block;" data-colorp-c></div></div></div>
-        <div style="margin:10px;"><div>Value: </div><div><input type="number" class="piePieceNumber" value="" style="border:1px solid #9e9e9e"></div></div>
+        <div style="margin:10px">
+          <div>Color: </div>
+          <div style="white-space:nowrap">
+            <input type="text" class="piePieceColorVal" style="border:1px solid #9e9e9e; width:70%">
+              <div class="piePieceColorPicker" style="width: 20px;height: 20px;top: 6px;left: 5px;cursor: pointer;position: relative;display: inline-block;" data-colorp-c></div>
+          </div>
+        </div>
+        <div style="margin:10px;">
+          <div>Value: </div>
+          <div><input type="number" class="piePieceNumber" value="" style="border:1px solid #9e9e9e"></div>
+        </div>
         <div class="gjsNumberPickerDiv" style="margin:10px;position:relative;display:inline-block;border:1px solid #fff"></div>
     `,
     /**
@@ -183,17 +192,16 @@ export default (editor, opt = {}) => {
         pickerEl.appendChild(this.model.colorPickerEl)
 
         // Add grapesJS NumberInput to settings - is IE11 compatible
-        var numberPickerDiv = inputEl.querySelector(".gjsNumberPickerDiv");
-        if (!this.model.numberPickerEl) {
-          var pickerObj = this
-          pickerObj.$input = null
-          pickerObj.model.attributes.value = thisTarget.attributes[thisModel.attributes.data.valName]
 
-          this.model.numberPickerEl = editor.TraitManager.getType('number').prototype.getInputEl.apply(pickerObj, arguments)
-          this.model.numberChangerDiv = pickerObj.input.$el[0];
-          //console.log("Number Input? ", )
-        }
-        numberPickerDiv.appendChild(this.model.numberChangerDiv)
+        var numberPickerDiv = inputEl.querySelector(".gjsNumberPickerDiv");
+        numberPickerDiv.id = "ppnp" + this.cid
+
+        var pickerObj = this
+        pickerObj.$input = null
+        pickerObj.model.attributes.value = thisTarget.attributes[thisModel.attributes.data.valName]
+        this.model.numberPickerEl = editor.TraitManager.getType('number').prototype.getInputEl.apply(pickerObj, arguments)
+        numberPickerDiv.appendChild(pickerObj.input.$el[0])
+        console.log("We have number picker. Number changer? ", numberPickerDiv)
         var numberPickerInput = numberPickerDiv.querySelector("input")
 
         // END numberInput
@@ -212,6 +220,7 @@ export default (editor, opt = {}) => {
         valEl.value = thisTarget.attributes[thisModel.attributes.data.valName]
 
         pickerEl.onchange = function() {
+          console.log("pickerEl changed: ", pickerEl)
             colorChange(thisModel.get('value'))
             thisModel.attributes.value = thisModel.attributes.data.val
             numberPickerInput.value = thisModel.attributes.data.val

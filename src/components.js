@@ -168,9 +168,10 @@ export default (editor, opt = {}) => {
         </div>
         <div style="margin:10px;">
           <div>Value: </div>
-          <div><input type="number" class="piePieceNumber" value="" style="border:1px solid #9e9e9e"></div>
+          <!--<div><input type="number" class="piePieceNumber" value="" style="border:1px solid #9e9e9e"></div>-->
+          <div class="gjsNumberPickerDiv" style="margin:10px;position:relative;display:inline-block;border:1px solid #9e9e9e"></div>
         </div>
-        <div class="gjsNumberPickerDiv" style="margin:10px;position:relative;display:inline-block;border:1px solid #fff"></div>
+
     `,
     /**
     * Returns the input element
@@ -195,13 +196,11 @@ export default (editor, opt = {}) => {
 
         var numberPickerDiv = inputEl.querySelector(".gjsNumberPickerDiv");
         numberPickerDiv.id = "ppnp" + this.cid
-
         var pickerObj = this
         pickerObj.$input = null
         pickerObj.model.attributes.value = thisTarget.attributes[thisModel.attributes.data.valName]
         this.model.numberPickerEl = editor.TraitManager.getType('number').prototype.getInputEl.apply(pickerObj, arguments)
         numberPickerDiv.appendChild(pickerObj.input.$el[0])
-        console.log("We have number picker. Number changer? ", numberPickerDiv)
         var numberPickerInput = numberPickerDiv.querySelector("input")
 
         // END numberInput
@@ -211,46 +210,54 @@ export default (editor, opt = {}) => {
         pickerTextField.id = "ptv" + this.cid
         var labelEl = inputEl.querySelector(".piePieceLabel")
         labelEl.id = "pplbl" + this.cid;
-        var valEl = inputEl.querySelector(".piePieceNumber")
-        valEl.id = "ppn" + this.cid
+        //var valEl = inputEl.querySelector(".piePieceNumber")
+        //valEl.id = "ppn" + this.cid
 
         pickerEl.value = thisTarget.attributes[thisModel.attributes.data.colorName]
         pickerTextField.value = pickerEl.value
         labelEl.value = thisModel.attributes.data.label
-        valEl.value = thisTarget.attributes[thisModel.attributes.data.valName]
+        //valEl.value = thisTarget.attributes[thisModel.attributes.data.valName]
 
-        pickerEl.onchange = function() {
-          console.log("pickerEl changed: ", pickerEl)
-            colorChange(thisModel.get('value'))
-            thisModel.attributes.value = thisModel.attributes.data.val
-            numberPickerInput.value = thisModel.attributes.data.val
-        }
-
-        numberPickerDiv.onchange = function() {
-          console.log("numberPicker changed: event? ", event)
-        }
         pickerTextField.onkeyup = function(evt) {
-          if (evt.key == 'Enter') colorChange(this.value)
+          if (evt.key == 'Enter') thisModel.colorChange(this.value)
         }
         pickerTextField.onblur = function() {
+          thisModel.colorChange(this.value)
+          /*
           thisModel.set('value',this.value);
           colorChange(thisModel.get('value'))
+          */
         }
-        valEl.onchange = function() {
-          console.log("valEl changed: ", this.value)
-          valueChange(this.value)
-        }
+
         function colorChange(newColor) {
           pickerEl.value = newColor;
           pickerTextField.value = newColor;
           thisTarget.attributes[thisModel.attributes.data.colorName] = newColor
           thisTarget.view.updateChart('color')
         }
-        function valueChange(newVal) {
+
+
+        /**
+         * TODO: make sure that the color of the picker indicator isn't lost
+         * when number picker is changed
+         */
+        this.model.numberChange = function(newVal) {
+          console.log("Do number change here")
+          thisModel.attributes.data.val = newVal
           thisTarget.attributes[thisModel.attributes.data.valName] = newVal
           thisTarget.view.updateChart('data')
         }
 
+        this.model.colorChange = function(newColor) {
+          console.log("Do color change here")
+          numberPickerInput.value = thisModel.attributes.data.val
+          thisModel.attributes.value = thisModel.attributes.data.val
+          pickerEl.value = newColor;
+          pickerTextField.value = newColor;
+          thisTarget.attributes[thisModel.attributes.data.colorName] = newColor
+          thisTarget.view.updateChart('color')
+
+        }
 
 
         this.inputEl = inputEl
@@ -262,8 +269,13 @@ export default (editor, opt = {}) => {
     /**
      * Triggered when the value of the model is changed
      */
-    onValueChange: function () {
-      console.log("pie piece data changed: ", this.model.get('value'), " - target? ", this.target)
+    onValueChange: function (model, value) {
+      console.log("pie piece data changed - model?: ", model, " - type? ", typeof value)
+      if (typeof value === 'number') {
+        model.numberChange(value);
+      } else if (typeof value === 'string') {
+        model.colorChange(value)
+      }
     }
   });
   // end new trait def

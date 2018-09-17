@@ -195,11 +195,7 @@ export default (editor, opt = {}) => {
         }
         numberPickerDiv.appendChild(this.model.numberChangerDiv)
         var numberPickerInput = numberPickerDiv.querySelector("input")
-        console.log("NumberPickerInput value?: ", numberPickerInput.value)
 
-        numberPickerInput.onchange = function () {
-
-        }
         // END numberInput
 
 
@@ -216,14 +212,9 @@ export default (editor, opt = {}) => {
         valEl.value = thisTarget.attributes[thisModel.attributes.data.valName]
 
         pickerEl.onchange = function() {
-          console.log("pickerEl changed: ", this, " - event: ", event)
-
             colorChange(thisModel.get('value'))
             thisModel.attributes.value = thisModel.attributes.data.val
             numberPickerInput.value = thisModel.attributes.data.val
-            console.log("NumberPickerInput value?: ", numberPickerInput.value)
-
-
         }
 
         numberPickerDiv.onchange = function() {
@@ -263,8 +254,7 @@ export default (editor, opt = {}) => {
      * Triggered when the value of the model is changed
      */
     onValueChange: function () {
-
-      console.log("pie piece data changed: ", this.model.get('value'), " - target? ", this.target, " - event? ", event)
+      console.log("pie piece data changed: ", this.model.get('value'), " - target? ", this.target)
     }
   });
   // end new trait def
